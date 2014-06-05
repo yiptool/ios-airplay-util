@@ -51,7 +51,12 @@
 
 -(UIView *)primaryView
 {
-	[self ensureHasPrimaryView];
+	if (!primaryView)
+	{
+		[self ensureHasPrimaryView];
+		if (primaryView)
+			[self updateViewHierarchy];
+	}
 	return primaryView;
 }
 
@@ -64,7 +69,12 @@
 
 -(UIView *)secondaryView
 {
-	[self ensureHasSecondaryView];
+	if (!secondaryView)
+	{
+		[self ensureHasSecondaryView];
+		if (secondaryView)
+			[self screenDidChange];
+	}
 	return secondaryView;
 }
 
@@ -72,30 +82,24 @@
 {
 	[secondaryView release];
 	secondaryView = [view retain];
-	[self updateViewHierarchy];
+	[self screenDidChange];
 }
 
 -(void)ensureHasPrimaryView
 {
 	if (!primaryView)
-	{
 		primaryView = [self newPrimaryView];
-		[self updateViewHierarchy];
-	}
 }
 
 -(void)ensureHasSecondaryView
 {
 	if (!secondaryView)
-	{
 		secondaryView = [self newSecondaryView];
-		[self updateViewHierarchy];
-	}
 }
 
 -(void)viewWillLayoutSubviews
 {
-	if (!externalScreen)
+	if (!externalScreen || !secondaryView)
 		primaryView.frame = self.view.bounds;
 	else
 	{
@@ -115,7 +119,9 @@
 	NSUInteger screenCount = [screens count];
 	NSLog(@"Screen count: %d", screenCount);
 
-	if (screenCount > 1)
+	[self ensureHasSecondaryView];
+
+	if (screenCount > 1 && secondaryView)
 	{
 		externalScreen = [[screens objectAtIndex:1] retain];
 
@@ -129,11 +135,6 @@
 	}
 
 	[self updateViewHierarchy];
-
-	if (screenCount < 2)
-		[self screenDidDisconnect];
-	else
-		[self screenDidConnect];
 }
 
 -(void)updateViewHierarchy
@@ -142,14 +143,14 @@
 	[secondaryView removeFromSuperview];
 
 	[self ensureHasPrimaryView];
+	[self ensureHasSecondaryView];
 
-	if (!externalScreen)
-		[self.view addSubview:self.primaryView];
+	if (!externalScreen || !secondaryView)
+		[self.view addSubview:primaryView];
 	else
 	{
-		[self ensureHasSecondaryView];
-		[externalWindow addSubview:self.primaryView];
-		[self.view addSubview:self.secondaryView];
+		[externalWindow addSubview:primaryView];
+		[self.view addSubview:secondaryView];
 	}
 
 	[self viewWillLayoutSubviews];
@@ -169,21 +170,7 @@
 
 -(UIView *)newSecondaryView
 {
-	UILabel * view = [[UILabel alloc] initWithFrame:CGRectZero];
-	view.textAlignment = NSTextAlignmentCenter;
-	view.textColor = [UIColor whiteColor];
-	view.backgroundColor = [UIColor blackColor];
-	view.numberOfLines = 2;
-	view.text = @"Content is being displayed\non the AirPlay device.";
-	return view;
-}
-
--(void)screenDidConnect
-{
-}
-
--(void)screenDidDisconnect
-{
+	return nil;
 }
 
 @end

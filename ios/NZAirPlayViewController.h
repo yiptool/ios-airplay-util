@@ -35,7 +35,5 @@
 // Override the following methods to provide user experience
 -(UIView *)newPrimaryView;
 -(UIView *)newSecondaryView;
--(void)screenDidConnect;
--(void)screenDidDisconnect;
 -(NSInteger)selectVideoMode:(NSArray *)availableModes;
 @end
