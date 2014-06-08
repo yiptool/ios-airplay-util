@@ -117,7 +117,7 @@
 
 	NSArray * screens = [UIScreen screens];
 	NSUInteger screenCount = [screens count];
-	NSLog(@"Screen count: %d", screenCount);
+	NSLog(@"Screen count: %d", (int)screenCount);
 
 	[self ensureHasSecondaryView];
 
